@@ -21,8 +21,7 @@ apt install vlan dnsmasq iptables-persistent -y
 
 # Add 8021q to modules to load it in the kernel
 sudo su -c "echo \"8021q\" >> /etc/modules"
-
-echo "8021q added"
+echo "----- 8021q added -----"
 
 # Add VLANS to /etc/network/interfaces.d/vlans
 tee -a /etc/network/interfaces.d/vlans <<EOF
@@ -41,6 +40,7 @@ auto eth0.10
 iface eth0.10 inet manual
   vlan-raw-device eth0
 EOF
+echo "----- /etc/network/interfaces.d/vlans done -----"
 
 # Add dhcpcd configuration
 tee -a /etc/dhcpcd.conf <<EOF
@@ -53,6 +53,7 @@ interface eth0.3
 static domain_nameservers=1.1.1.1.1
 static ip_address=192.168.3.1/24
 EOF
+echo "----- /etc/dhcpcd.conf done -----"
 
 # Add VLAN interfaces to /etc/network/interfaces
 > '/etc/network/interfaces'
@@ -84,6 +85,7 @@ netmask 255.255.255.0
 network 192.168.3.0
 broadcast 192.168.3.255
 EOF
+echo "----- /etc/network/interfaces done -----"
 
 # Add DNSMasq config and DHCP ranges to /etc/dnsmasq.conf
 > '/etc/dnsmasq.conf'
@@ -100,8 +102,10 @@ listen-address=172.0.0.1
 domain=yourdomain.com
 dhcp-range=192.168.3.1,192.168.3.254,12h
 EOF
+echo "----- /etc/dnsmasq.conf done -----"
 
 # Enable ipv4 forwarding.
 sed -i'' s/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/ /etc/sysctl.conf
+echo "----- ipv4 forwarding done -----"
 
-echo "script done"
+echo "----- script done -----"
