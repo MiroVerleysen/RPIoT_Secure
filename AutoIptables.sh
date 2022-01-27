@@ -16,5 +16,10 @@ IFS=$OLDIFS
 if grep -w "Chromecast" $OUTPUT
 then
         sed -i'' s/#enable-reflector=no/enable-reflector=yes/ /etc/avahi/avahi-daemon.conf
-        echo "----- Chromecast added -----"
+        service avahi-daemon restart
+        echo "----- Avahi Enabled -----"
+else
+        sed -i'' s/enable-reflector=yes/#enable-reflector=no/ /etc/avahi/avahi-daemon.conf
+        service avahi-daemon restart
+        echo "----- Avahi Disabled -----"
 fi
