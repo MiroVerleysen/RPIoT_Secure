@@ -12,3 +12,9 @@ do
         echo "iptables -A FORWARD -i $IOT_INTERFACE -p $protocol --dport $port -j ACCEPT -m comment --comment $comment" >> $OUTPUT
 done < $INPUT
 IFS=$OLDIFS
+
+if grep -w "Chromecast" $OUTPUT
+then
+        sed -i'' s/#enable-reflector=no/enable-reflector=yes/ /etc/avahi/avahi-daemon.conf
+        echo "----- Chromecast added -----"
+fi
