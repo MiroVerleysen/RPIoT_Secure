@@ -6,14 +6,14 @@ OLDIFS=$IFS
 IFS=','
 [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
 > $OUTPUT
-while read device protocol port comment
+while read protocol port device comment
 do
-        echo "$device $protocol $port $comment"
-        echo "iptables -A FORWARD -i $IOT_INTERFACE -p $protocol --dport $port -j ACCEPT -m comment --comment $comment" >> $OUTPUT
+        echo "$protocol $port $device"
+        echo "iptables -A FORWARD -i $IOT_INTERFACE -p $protocol --dport $port -j ACCEPT -m comment --comment $device" >> $OUTPUT
 done < $INPUT
 IFS=$OLDIFS
 
-if grep -w "Chromecast" $OUTPUT
+if grep -w "chromecast" $OUTPUT
 then
         sed -i'' s/#enable-reflector=no/enable-reflector=yes/ /etc/avahi/avahi-daemon.conf
         service avahi-daemon restart
