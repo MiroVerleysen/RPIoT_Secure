@@ -20,11 +20,18 @@ echo iptables-persistent iptables-persistent/autosave_v6 boolean true | sudo deb
 apt install vlan dnsmasq iptables-persistent -y
 
 # Add 8021q to modules to load it in the kernel
+if  grep -q "8021q" "/etc/modules" ; then
+    echo "8021q module is OK"
+else
 sudo su -c "echo \"8021q\" >> /etc/modules"
+fi
 echo "----- 8021q added -----"
 
 # Add VLANS to /etc/network/interfaces.d/vlans
-tee -a /etc/network/interfaces.d/vlans <<EOF
+if  grep -q "USER VLAN" "/etc/network/interfaces.d/vlans" ; then
+    echo "/etc/network/interfaces.d/vlans is OK"
+else
+    tee -a /etc/network/interfaces.d/vlans <<EOF
 # USER VLAN
 auto eth0.2
 iface eth0.2 inet manual
@@ -33,17 +40,21 @@ iface eth0.2 inet manual
 # IoT VLAN
 auto eth0.3
 iface eth0.3 inet manual
-  vlan-raw-device eth0  
+  vlan-raw-device eth0
 
 # WAN VLAN
 auto eth0.10
 iface eth0.10 inet manual
   vlan-raw-device eth0
 EOF
+fi
 echo "----- /etc/network/interfaces.d/vlans done -----"
 
 # Add dhcpcd configuration
-tee -a /etc/dhcpcd.conf <<EOF
+if  grep -q "interface eth0.10" "/etc/dhcpcd.conf" ; then
+    echo "/etc/dhcpcd.conf is OK"
+else
+    tee -a /etc/dhcpcd.conf <<EOF
 interface eth0.10
 static domain_nameservers=8.8.8.8,8.8.4.4,1.1.1.1.1
 interface eth0.2
@@ -53,6 +64,7 @@ interface eth0.3
 static domain_nameservers=1.1.1.1.1
 static ip_address=192.168.3.1/24
 EOF
+fi
 echo "----- /etc/dhcpcd.conf done -----"
 
 # Add VLAN interfaces to /etc/network/interfaces
