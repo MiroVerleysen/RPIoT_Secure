@@ -1,12 +1,28 @@
 #!/usr/bin/env bash
+
+# USER VARIABLES
 ENABLE_INTERNET=true
 USER_INTERFACE=eth0.2
 IOT_INTERFACE=eth0.3
 WAN_INTERFACE=eth0.10
 OUTPUT=fwrules.txt
 INPUT=iotdevices.csv
+
+# SYSTEM VARIABLES
 OLDIFS=$IFS
 IFS=','
+
+# Exit immediately if a command exits with a non-zero status
+set -e
+
+# Check if script is running as root
+if [ "$(id -u)" -ne 0 ];
+then
+    echo "ERROR! This script must be run by root"
+    exit 1
+fi
+
+# CHECK CSV FILE
 [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
 > $OUTPUT
 
@@ -43,6 +59,7 @@ do
   $line
 done < "$OUTPUT"
 
+# Check for specefic devices that need extra config
 if grep -w "chromecast" $OUTPUT
 then
         sed -i'' s/#enable-reflector=no/enable-reflector=yes/ /etc/avahi/avahi-daemon.conf
