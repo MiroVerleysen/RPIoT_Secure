@@ -26,6 +26,20 @@ fi
 [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
 > $OUTPUT
 
+# clear iptables
+cleariptables () {
+    iptables -P INPUT ACCEPT
+    iptables -P FORWARD ACCEPT
+    iptables -P OUTPUT ACCEPT
+    iptables -t nat -F
+    iptables -t mangle -F
+    iptables -F
+    iptables -X
+    echo "----- iptables reset -----"
+}
+
+cleariptables
+
 # Add default iptables to firewall rules file
 # nat rule om te routeren via WAN_INTERFACE
 echo "iptables -t nat -A POSTROUTING -o $WAN_INTERFACE -j MASQUERADE" >> $OUTPUT
