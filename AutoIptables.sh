@@ -38,18 +38,24 @@ cleariptables () {
     echo "----- iptables reset -----"
 }
 
+# forward alles droppen
+# nat rule om te routeren via WAN_INTERFACE
+defaultrules () {
+    cat << EOF >> $OUTPUT
+iptables -t nat -A POSTROUTING -o $WAN_INTERFACE -j MASQUERADE
+iptables -P FORWARD DROP
+iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+iptables -A FORWARD -i eth0.3 -p tcp --dport 80 -j ACCEPT
+iptables -A FORWARD -i eth0.3 -p tcp --dport 443 -j ACCEPT
+iptables -A FORWARD -i eth0.3 -p udp --dport 53 -j ACCEPT
+iptables -A FORWARD -i eth0.3 -p udp --dport 123 -j ACCEPT
+EOF
+}
+
 cleariptables
 
 # Add default iptables to firewall rules file
-# nat rule om te routeren via WAN_INTERFACE
-echo "iptables -t nat -A POSTROUTING -o $WAN_INTERFACE -j MASQUERADE" >> $OUTPUT
-# forward alles droppen
-echo "iptables -P FORWARD DROP" >> $OUTPUT
-echo "iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT" >> $OUTPUT
-echo "iptables -A FORWARD -i eth0.3 -p tcp --dport 80 -j ACCEPT" >> $OUTPUT
-echo "iptables -A FORWARD -i eth0.3 -p tcp --dport 443 -j ACCEPT" >> $OUTPUT
-echo "iptables -A FORWARD -i eth0.3 -p udp --dport 53 -j ACCEPT" >> $OUTPUT
-echo "iptables -A FORWARD -i eth0.3 -p udp --dport 123 -j ACCEPT" >> $OUTPUT
+defaultrules
 
 # Check if internet is wanted on user VLAN
 if $ENABLE_INTERNET true
