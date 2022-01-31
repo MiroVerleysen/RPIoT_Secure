@@ -1,0 +1,5 @@
+tcp,8008,chromecast,allow chromecast Specific
+tcp,8009,chromecast,allow chromecast Specific
+udp,319,sonos,allow sonos Specific
+udp,320,sonos,allow sonos Specific
+tcp,2022,samsungsmartfridge,allow Samsung Family Hub Fridge
