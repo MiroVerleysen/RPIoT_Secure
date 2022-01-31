@@ -128,16 +128,18 @@ do
 done < "$OUTPUT"
 
 # Check for specefic devices that need extra config
-if grep -w "chromecast" $OUTPUT
+if grep -w "chromecast" $OUTPUT # || grep -w "<devicename>" $OUTPUT
 then
         enableavahi
 else
         disableavahi
 fi
 
-if grep -w "sonos" $OUTPUT
+if grep -w "sonos" $OUTPUT # || grep -w "<devicename>" $OUTPUT
 then
         enableigmpproxy
 else
         disableigmpproxy
 fi
+
+echo "----- script done -----"
