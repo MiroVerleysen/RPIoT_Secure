@@ -39,7 +39,6 @@ cleariptables () {
 }
 
 # forward alles droppen
-# nat rule om te routeren via WAN_INTERFACE
 defaultrules () {
     cat << EOF >> $OUTPUT
 iptables -t nat -A POSTROUTING -o $WAN_INTERFACE -j MASQUERADE
@@ -52,6 +51,52 @@ iptables -A FORWARD -i eth0.3 -p udp --dport 123 -j ACCEPT
 EOF
 }
 
+enableavahi () {
+        sed -i'' s/#enable-reflector=no/enable-reflector=yes/ /etc/avahi/avahi-daemon.conf
+        service avahi-daemon restart
+        echo "----- Avahi Enabled -----"
+}
+
+disableavahi () {
+        sed -i'' s/enable-reflector=yes/#enable-reflector=no/ /etc/avahi/avahi-daemon.conf
+        service avahi-daemon restart
+        echo "----- Avahi Disabled -----"
+}
+
+enableigmpproxy () {
+        if  grep -q "eth0.2" "/etc/igmpproxy.conf" ; then
+                echo "igmpproxy is OK"
+        else
+                apt install igmpproxy -y
+                > '/etc/igmpproxy.conf'
+                tee -a /etc/igmpproxy.conf <<EOF
+##------------------------------------------------------
+## Enable Quickleave mode (Sends Leave instantly)
+##------------------------------------------------------
+quickleave
+
+
+##------------------------------------------------------
+## Configuration for eth0.2 (Upstream Interface)
+##------------------------------------------------------
+phyint eth0.2 upstream ratelimit 0 threshold 1
+
+
+##------------------------------------------------------
+## Configuration for eth0.3 (Downstream Interface)
+##------------------------------------------------------
+phyint eth0.3 downtream ratelimit 0 threshold 1
+EOF
+fi
+        echo "----- igmpproxy Enabled -----"
+}
+
+disableigmpproxy () {
+        apt purge igmpproxy -y
+        echo "----- igmpproxy Disabled -----"
+}
+
+# Clear iptables to default
 cleariptables
 
 # Add default iptables to firewall rules file
@@ -85,11 +130,14 @@ done < "$OUTPUT"
 # Check for specefic devices that need extra config
 if grep -w "chromecast" $OUTPUT
 then
-        sed -i'' s/#enable-reflector=no/enable-reflector=yes/ /etc/avahi/avahi-daemon.conf
-        service avahi-daemon restart
-        echo "----- Avahi Enabled -----"
+        enableavahi
 else
-        sed -i'' s/enable-reflector=yes/#enable-reflector=no/ /etc/avahi/avahi-daemon.conf
-        service avahi-daemon restart
-        echo "----- Avahi Disabled -----"
+        disableavahi
+fi
+
+if grep -w "sonos" $OUTPUT
+then
+        enableigmpproxy
+else
+        disableigmpproxy
 fi
