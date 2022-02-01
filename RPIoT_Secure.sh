@@ -56,7 +56,7 @@ if  grep -q "interface eth0.10" "/etc/dhcpcd.conf" ; then
 else
     tee -a /etc/dhcpcd.conf <<EOF
 interface eth0.10
-static domain_nameservers=8.8.8.8,8.8.4.4,1.1.1.1.1
+static domain_nameservers=8.8.8.8,8.8.4.4,1.1.1.1
 interface eth0.2
 static domain_nameservers=1.1.1.1.1
 static ip_address=192.168.2.1/24
